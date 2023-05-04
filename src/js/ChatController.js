@@ -12,10 +12,9 @@ export default class ChatController {
 
     this.chat = document.body.querySelector('.chat');
 
-    const ws = new WebSocket('ws://chat-backend-0nti.onrender.com/ws');
+    const ws = new WebSocket('wss://chat-backend-0nti.onrender.com/wss');
     ws.addEventListener('open', () => {
       console.log('connected');
-    });
 
     document.querySelector('.modal').querySelector('button').addEventListener('click', (e) => {
       e.preventDefault();
