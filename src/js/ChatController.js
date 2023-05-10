@@ -12,7 +12,8 @@ export default class ChatController {
 
     this.chat = document.body.querySelector('.chat');
 
-    const ws = new WebSocket('ws://chat-backend-0nti.onrender.com/ws');
+    // const ws = new WebSocket('ws://chat-backend-0nti.onrender.com/ws');
+    const ws = new WebSocket('ws://localhost:7070/ws');
     ws.addEventListener('open', () => {
       console.log('connected');
     });
@@ -27,19 +28,24 @@ export default class ChatController {
     ws.addEventListener('message', (evt) => {
       const response = JSON.parse(evt.data);
       if (response.type === 'addUser') {
-        if (response.data === 'error') {
-          alert('this nickname is already taken!');
-        } else if (this.user !== response.data) {
-          this.addUser(response.data);
-        } else {
+        if (response.data === this.user) {
+          if (response.data === 'error') {
+            alert('this nickname is already taken!');
+          }
+          ws.send(JSON.stringify({ type: 'activeUsers' }));
+
           this.modal.removeModal();
           this.chat.style.opacity = 1;
+        } else {
           this.addUser(response.data);
         }
       } else if (response.type === 'message') {
         this.createMessage(response.user, response.time, response.data);
-      } else if (response.type === 'deleteUser') {
-        this.deleteUser(response.data);
+      } else if (response.type === 'activeUsers') {
+        this.deleteUsers();
+        response.data.forEach((item) => {
+          this.addUser(item);
+        });
       }
     });
 
@@ -95,8 +101,9 @@ export default class ChatController {
     chatContainer.appendChild(message);
   }
 
-  deleteUser(user) {
-    const toDelete = this.chat.querySelector(`[data-name=${user}]`);
-    toDelete.remove();
+  // eslint-disable-next-line class-methods-use-this
+  deleteUsers() {
+    const users = document.body.querySelector('.chat__users').querySelectorAll('li');
+    users.forEach((item) => item.remove());
   }
 }
